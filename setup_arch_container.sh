@@ -3,38 +3,12 @@ set -e
 
 CONTAINER_NAME="arch"
 IMAGE="docker.io/library/archlinux:latest"
+
 ARCH_PKGS=(
-  # --- Base do Arch ---
-  "base"
-  "base-devel"
-  "yay"
-  "git"
-  "man-db"
-  "man-pages"
-
-  # --- Shell e Terminal ---
-  "fish"
-  "starship"
-  "tmux"
-  "stow"
-
-  # --- Ferramentas CLI Modernas ---
-  "bat"
-  "eza"
-  "fd"
-  "fzf"
-  "ripgrep"
-  "fastfetch"
-  "btop"
-  "lazygit"
-  "unrar"
-  "unzip"
-  "wget"
-  "tree"
-  "inotify-tools"
-  "less"
-
-  # --- Desenvolvimento (Editores e Suporte) ---
+  "base" "base-devel" "git" "man-db" "man-pages"
+  "fish" "starship" "tmux" "stow"
+  "bat" "eza" "fd" "fzf" "ripgrep" "fastfetch" "btop" "lazygit"
+  "unrar" "unzip" "wget" "tree" "inotify-tools" "less"
   "neovim-nightly-bin"
   "zed"
   "python-pipx"
@@ -46,16 +20,14 @@ ARCH_PKGS=(
   "prettier"
   "lua51"
   "luarocks"
-
-  # --- GUI / Temas (Exportados) ---
-  "nwg-look" # Melhor que lxappearance para Wayland/Sway
-  "qt6ct"    # Para temas QT
-  "libpulse" # Compatibilidade de áudio
-
-  # --- Docker Clients (Sem o Daemon) ---
-  "docker-compose" # Funciona conectando no socket do Podman do host
-  "lazydocker"     # Funciona conectando no socket do Podman do host
+  "nwg-look"
+  "qt6ct"
+  "libpulse"
+  "docker-compose"
+  "lazydocker"
 )
+
+PKGS_STRING="${ARCH_PKGS[*]}"
 
 echo "### Beginning Arch Linux container setup ###"
 
@@ -66,10 +38,36 @@ else
   distrobox create --name "$CONTAINER_NAME" --image "$IMAGE" --yes
 fi
 
-echo "Installing packages on Arch..."
-distrobox enter "$CONTAINER_NAME"
-sudo pacman -Sy --noconfirm archlinux-keyring
-sudo pacman -Syu --noconfirm
-sudo pacman -S --noconfirm --needed "${ARCH_PKGS[@]}"
+echo "Initializing Update and Bootstrap..."
+
+distrobox enter "$CONTAINER_NAME" -- sh -c "
+    # Atualiza chaves e sistema básico
+    sudo pacman -Sy --noconfirm archlinux-keyring
+    sudo pacman -Syu --noconfirm
+
+    # Instala pré-requisitos para compilar o Yay
+    sudo pacman -S --noconfirm --needed base-devel git
+"
+
+echo "Installing Yay (AUR Helper)..."
+distrobox enter "$CONTAINER_NAME" -- sh -c "
+    if ! command -v yay &> /dev/null; then
+        cd /tmp
+        rm -rf yay
+        git clone https://aur.archlinux.org/yay.git
+        cd yay
+        # makepkg não pode rodar como root, mas o distrobox roda como user
+        makepkg -si --noconfirm
+        cd ..
+        rm -rf yay
+    else
+        echo 'Yay is already installed.'
+    fi
+"
+
+echo "Installing full package list..."
+distrobox enter "$CONTAINER_NAME" -- sh -c "
+    yay -S --noconfirm --needed $PKGS_STRING
+"
 
 echo "### CONTAINER SETUP FINISHED ###"
