@@ -67,7 +67,7 @@ else
 fi
 
 echo "Installing packages on Arch..."
-distrobox enter "$CONTAINER_NAME" -- sh -c
+distrobox enter "$CONTAINER_NAME"
 sudo pacman -Sy --noconfirm archlinux-keyring
 sudo pacman -Syu --noconfirm
 sudo pacman -S --noconfirm --needed "${ARCH_PKGS[@]}"
