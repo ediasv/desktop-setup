@@ -8,6 +8,7 @@ SYSTEM_PKGS=(
   "alacritty"
   "tmux"
   "stow"
+  "wireguard-tools"
 )
 
 echo ">> Instalando pacotes do sistema..."
