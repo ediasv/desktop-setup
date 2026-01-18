@@ -34,7 +34,7 @@ flatpak install -y flathub "${FLATPAK_LIST[@]}"
 
 echo ">> Configurando fonte do sistema"
 curl -OL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz
-sudo mkdir -p ~/.local/share/fonts/
+mkdir -p ~/.local/share/fonts/
 tar -xf JetBrainsMono.tar.xz -C ~/.local/share/fonts
 rm JetBrainsMono.tar.xz
 fc-cache -vf ~/.local/share/fonts/
