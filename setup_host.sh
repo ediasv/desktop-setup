@@ -4,7 +4,6 @@ set -e
 echo "### INICIANDO SETUP DO HOST (FEDORA ATOMIC) ###"
 
 SYSTEM_PKGS=(
-  "wl-clipboard"
   "distrobox"
   "alacritty"
   "tmux"
