@@ -41,11 +41,11 @@ fi
 echo "Initializing Update and Bootstrap..."
 
 distrobox enter "$CONTAINER_NAME" -- sh -c "
-    # Atualiza chaves e sistema básico
+    # Updating keyring and base system
     sudo pacman -Sy --noconfirm archlinux-keyring
     sudo pacman -Syu --noconfirm
 
-    # Instala pré-requisitos para compilar o Yay
+    # Installing prerequisites for compiling Yay
     sudo pacman -S --noconfirm --needed base-devel git
 "
 
@@ -56,7 +56,7 @@ distrobox enter "$CONTAINER_NAME" -- sh -c "
         rm -rf yay
         git clone https://aur.archlinux.org/yay.git
         cd yay
-        # makepkg não pode rodar como root, mas o distrobox roda como user
+        # makepkg cannot run as root, but distrobox runs as user
         makepkg -si --noconfirm
         cd ..
         rm -rf yay
